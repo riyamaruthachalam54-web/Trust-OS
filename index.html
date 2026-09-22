@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustOS — Explainable AI for Trust & Safety</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0B0E13;
+            --surface: #12161F;
+            --surface-2: #1A2130;
+            --text: #E9E7DF;
+            --text-dim: #8B93A3;
+            --text-faint: #545E70;
+            --blue: #4A7CFF;
+            --blue-dim: #2C4AA0;
+            --amber: #E0A23B;
+            --line: #232C3D;
+            --radius: 3px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'IBM Plex Sans', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: -0.01em;
+            font-weight: 600;
+        }
+
+        .mono {
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .wrap {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+
+        @media(max-width:640px) {
+            .wrap {
+                padding: 0 20px;
+            }
+        }
+
+        /* ---- NAV ---- */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(11, 14, 19, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--line);
+        }
+
+        nav .wrap {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Space Grotesk';
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .logo-mark {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--blue);
+            border-radius: 50%;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .logo-mark::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 6px;
+            height: 6px;
+            background: var(--amber);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .navlinks {
+            display: flex;
+            gap: 32px;
+            font-size: 14px;
+            color: var(--text-dim);
+        }
+
+        .navlinks a:hover {
+            color: var(--text);
+        }
+
+        .navlinks {
+            display: none;
+        }
+
+        @media(min-width:800px) {
+            .navlinks {
+                display: flex;
+            }
+        }
+
+        .nav-cta {
+            font-size: 13px;
+            padding: 9px 16px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            color: var(--text);
+            white-space: nowrap;
+            transition: border-color .2s;
+        }
+
+        .nav-cta:hover {
+            border-color: var(--blue);
+        }
+
+        /* ---- HERO ---- */
+        .hero {
+            padding: 88px 0 64px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 56px;
+            align-items: start;
+        }
+
+        @media(min-width:960px) {
+            .hero-grid {
+                grid-template-columns: 1.1fr 0.9fr;
+            }
+        }
+
+        .eyebrow {
+            font-family: 'IBM Plex Mono';
+            font-size: 12px;
+            color: var(--amber);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .eyebrow .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--amber);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        .hero h1 {
+            font-size: clamp(34px, 5vw, 54px);
+            line-height: 1.08;
+            max-width: 640px;
+        }
+
+        .hero h1 .accent {
+            color: var(--blue);
+        }
+
+        .hero p.sub {
+            margin-top: 22px;
+            font-size: 17px;
+            color: var(--text-dim);
+            max-width: 520px;
+        }
+
+        .hero-ctas {
+            display: flex;
+            gap: 14px;
+            margin-top: 34px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 13px 22px;
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all .15s;
+        }
+
+        .btn-primary {
+            background: var(--blue);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #5c8aff;
+        }
+
+        .btn-ghost {
+            border: 1px solid var(--line);
+            color: var(--text);
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--text-dim);
+        }
+
+        /* ---- LEDGER (signature element) ---- */
+        .ledger {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .ledger-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--line);
+            font-family: 'IBM Plex Mono';
+            font-size: 11px;
+            color: var(--text-faint);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .ledger-head .live {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #5FD98A;
+        }
+
+        .ledger-head .live .dot {
+            width: 6px;
+            height: 6px;
+            background: #5FD98A;
+            border-radius: 50%;
+            animation: pulse 1.4s infinite;
+        }
+
+        .ledger-body {
+            height: 280px;
+            padding: 16px;
+            font-family: 'IBM Plex Mono';
+            font-size: 12.5px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .ledger-line {
+            display: flex;
+            gap: 10px;
+            padding: 4px 0;
+            opacity: 0;
+            animation: fadein .4s forwards;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        @keyframes fadein {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .ledger-line .ts {
+            color: var(--text-faint);
+            flex-shrink: 0;
+        }
+
+        .ledger-line .case {
+            color: var(--blue);
+            flex-shrink: 0;
+        }
+
+        .ledger-line .msg {
+            color: var(--text-dim);
+        }
+
+        .ledger-line .msg.risk {
+            color: var(--amber);
+        }
+
+        .ledger-line .msg.ok {
+            color: #5FD98A;
+        }
+
+        .ledger-foot {
+            padding: 10px 16px;
+            border-top: 1px solid var(--line);
+            font-family: 'IBM Plex Mono';
+            font-size: 10.5px;
+            color: var(--text-faint);
+        }
+
+        /* ---- SECTION generic ---- */
+        section {
+            padding: 80px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .section-head {
+            max-width: 680px;
+            margin-bottom: 48px;
+        }
+
+        .section-head .eyebrow {
+            margin-bottom: 14px;
+        }
+
+        .section-head h2 {
+            font-size: clamp(26px, 3.4vw, 36px);
+        }
+
+        .section-head p {
+            color: var(--text-dim);
+            margin-top: 14px;
+            font-size: 16px;
+        }
+
+        /* ---- PROBLEM ---- */
+        .problem-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1px;
+            background: var(--line);
+            border: 1px solid var(--line);
+        }
+
+        @media(min-width:700px) {
+            .problem-list {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .problem-item {
+            background: var(--bg);
+            padding: 24px;
+            font-size: 15px;
+            color: var(--text-dim);
+        }
+
+        .problem-item b {
+            color: var(--text);
+            display: block;
+            font-family: 'Space Grotesk';
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 15.5px;
+        }
+
+        /* ---- PIPELINE ---- */
+        .pipeline {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .pstep {
+            display: grid;
+            grid-template-columns: 56px 1fr;
+            gap: 20px;
+            padding: 26px 0;
+            border-bottom: 1px solid var(--line);
+            position: relative;
+        }
+
+        .pstep:last-child {
+            border-bottom: none;
+        }
+
+        .pnum {
+            font-family: 'IBM Plex Mono';
+            font-size: 13px;
+            color: var(--blue);
+            padding-top: 2px;
+        }
+
+        .pline {
+            position: absolute;
+            left: 28px;
+            top: 56px;
+            bottom: -1px;
+            width: 1px;
+            background: var(--line);
+        }
+
+        .pstep:last-child .pline {
+            display: none;
+        }
+
+        .pstep h3 {
+            font-size: 18px;
+            margin-bottom: 6px;
+        }
+
+        .pstep p {
+            color: var(--text-dim);
+            font-size: 14.5px;
+            max-width: 600px;
+        }
+
+        .ptag {
+            display: inline-block;
+            font-family: 'IBM Plex Mono';
+            font-size: 10.5px;
+            color: var(--text-faint);
+            border: 1px solid var(--line);
+            border-radius: 2px;
+            padding: 2px 7px;
+            margin-top: 10px;
+            letter-spacing: 0.03em;
+        }
+
+        /* ---- SCREENS ---- */
+        .shot {
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            overflow: hidden;
+            background: var(--surface);
+            margin-bottom: 20px;
+        }
+
+        .shot img {
+            width: 100%;
+            display: block;
+            opacity: 0.94;
+        }
+
+        .shot-cap {
+            padding: 12px 16px;
+            font-family: 'IBM Plex Mono';
+            font-size: 11.5px;
+            color: var(--text-faint);
+            border-top: 1px solid var(--line);
+        }
+
+        .shots-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media(min-width:800px) {
+            .shots-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .shots-grid .wide {
+            grid-column: 1/-1;
+        }
+
+        /* ---- STACK ---- */
+        .stack-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14.5px;
+        }
+
+        .stack-table tr {
+            border-bottom: 1px solid var(--line);
+        }
+
+        .stack-table td {
+            padding: 16px 8px;
+            color: var(--text-dim);
+        }
+
+        .stack-table td:first-child {
+            color: var(--text-faint);
+            font-family: 'IBM Plex Mono';
+            font-size: 12px;
+            width: 200px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stack-table td:last-child {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        /* ---- VALUE ---- */
+        .value-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1px;
+            background: var(--line);
+            border: 1px solid var(--line);
+        }
+
+        @media(min-width:700px) {
+            .value-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .value-item {
+            background: var(--bg);
+            padding: 26px 22px;
+        }
+
+        .value-item .n {
+            font-family: 'IBM Plex Mono';
+            color: var(--amber);
+            font-size: 12px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .value-item h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .value-item p {
+            font-size: 14px;
+            color: var(--text-dim);
+        }
+
+        /* ---- FOOTER / CTA ---- */
+        footer {
+            padding: 64px 0 40px;
+        }
+
+        .footer-cta {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            padding: 40px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            margin-bottom: 56px;
+        }
+
+        @media(min-width:800px) {
+            .footer-cta {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+
+        .footer-cta h3 {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .footer-cta p {
+            color: var(--text-dim);
+            font-size: 14.5px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+
+        .foot-bottom {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            font-size: 13px;
+            color: var(--text-faint);
+        }
+
+        @media(min-width:700px) {
+            .foot-bottom {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+        .foot-bottom a {
+            color: var(--text-faint);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .foot-bottom a:hover {
+            color: var(--text-dim);
+        }
+
+        ::selection {
+            background: var(--blue-dim);
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="wrap">
+            <div class="logo"><span class="logo-mark"></span>TrustOS</div>
+            <div class="navlinks">
+                <a href="#architecture">Architecture</a>
+                <a href="#screens">Product</a>
+                <a href="#stack">Stack</a>
+                <a href="#value">Value</a>
+            </div>
+            <a class="nav-cta" href="https://risk-arbiter.lovable.app" target="_blank" rel="noopener">Live demo →</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="wrap hero-grid">
+            <div>
+                <div class="eyebrow"><span class="dot"></span>Multi-agent · human-governed</div>
+                <h1>Every trust &amp; safety decision, <span class="accent">explained and sealed.</span></h1>
+                <p class="sub">TrustOS routes evidence, policy, and visual signals through specialised AI agents to
+                    reach a risk recommendation — then logs exactly how it got there, before a human signs off.</p>
+                <div class="hero-ctas">
+                    <a class="btn btn-primary" href="https://risk-arbiter.lovable.app" target="_blank"
+                        rel="noopener">Open live demo</a>
+                    <a class="btn btn-ghost" href="https://github.com/andy18av-alt/TrustOS" target="_blank"
+                        rel="noopener">View repository</a>
+                </div>
+            </div>
+
+            <div class="ledger">
+                <div class="ledger-head">
+                    <span>audit_log.stream</span>
+                    <span class="live"><span class="dot"></span>live</span>
+                </div>
+                <div class="ledger-body" id="ledgerBody"></div>
+                <div class="ledger-foot">Every line is hash-sealed on write — nothing here can be edited after the fact.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="problem">
+        <div class="wrap">
+            <div class="section-head">
+                <div class="eyebrow">The problem</div>
+                <h2>Manual review doesn't scale, and black-box AI doesn't survive an audit.</h2>
+            </div>
+            <div class="problem-list">
+                <div class="problem-item"><b>Volume outpaces headcount</b>Thousands of cases arrive daily across
+                    marketplaces, fintech, and social platforms — far more than investigators can review consistently.
+                </div>
+                <div class="problem-item"><b>Evidence lives everywhere</b>Signals are scattered across payment systems,
+                    chat logs, images, and policy documents that nobody has time to cross-reference by hand.</div>
+                <div class="problem-item"><b>Policy drifts between reviewers</b>The same violation can get two different
+                    outcomes depending on who's on shift and how they read the rulebook that day.</div>
+                <div class="problem-item"><b>Regulators want a paper trail</b>"The model flagged it" isn't a defensible
+                    answer anymore — every high-impact decision needs a reason a human can stand behind.</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="architecture">
+        <div class="wrap">
+            <div class="section-head">
+                <div class="eyebrow">Architecture</div>
+                <h2>One case, seven checkpoints.</h2>
+                <p>A case doesn't reach a decision until it's passed through every stage below, in order — that's the
+                    point.</p>
+            </div>
+            <div class="pipeline">
+                <div class="pstep">
+                    <div class="pline"></div>
+                    <div class="pnum">01</div>
+                    <div>
+                        <h3>Event intake</h3>
+                        <p>A flagged listing, transaction, or account enters the investigation portal with its full
+                            context attached.</p><span class="ptag">Investigation Portal</span>
+                    </div>
+                </div>
+                <div class="pstep">
+                    <div class="pline"></div>
+                    <div class="pnum">02</div>
+                    <div>
+                        <h3>Parallel agent analysis</h3>
+                        <p>The Evidence Agent correlates records across systems, the Policy Agent maps the case to the
+                            relevant clauses, and the Vision Agent inspects any submitted imagery — simultaneously.</p>
+                        <span class="ptag">Evidence · Policy · Vision</span>
+                    </div>
+                </div>
+                <div class="pstep">
+                    <div class="pline"></div>
+                    <div class="pnum">03</div>
+                    <div>
+                        <h3>Autonomous Risk Council</h3>
+                        <p>Agent findings are weighed against each other to produce a single risk position, with
+                            disagreements surfaced rather than silently averaged.</p><span class="ptag">Risk
+                            Council</span>
+                    </div>
+                </div>
+                <div class="pstep">
+                    <div class="pline"></div>
+                    <div class="pnum">04</div>
+                    <div>
+                        <h3>Compliance Decision Engine</h3>
+                        <p>The risk position is checked against enterprise policy thresholds to determine whether it can
+                            be closed automatically or needs a person.</p><span class="ptag">Decision Engine</span>
+                    </div>
+                </div>
+                <div class="pstep">
+                    <div class="pline"></div>
+                    <div class="pnum">05</div>
+                    <div>
+                        <h3>Human review, when it matters</h3>
+                        <p>High-impact or ambiguous cases stop here. A reviewer sees the full reasoning chain, not just
+                            a score.</p><span class="ptag">Human-in-the-loop</span>
+                    </div>
+                </div>
+                <div class="pstep">
+                    <div class="pline"></div>
+                    <div class="pnum">06</div>
+                    <div>
+                        <h3>Executive report</h3>
+                        <p>A plain-language summary of the case, the evidence, and the reasoning is generated for
+                            stakeholders who weren't in the investigation.</p><span class="ptag">Reporting</span>
+                    </div>
+                </div>
+                <div class="pstep">
+                    <div class="pnum">07</div>
+                    <div>
+                        <h3>Sealed audit log</h3>
+                        <p>The full decision path is written to an immutable log — the same stream you saw ticking in
+                            the hero above.</p><span class="ptag">Governance</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="screens">
+        <div class="wrap">
+            <div class="section-head">
+                <div class="eyebrow">Inside the product</div>
+                <h2>What an investigator actually sees.</h2>
+            </div>
+            <div class="shots-grid">
+                <div class="shot wide">
+                    <img src="https://github.com/andy18av-alt/TrustOS/raw/main/assets/Dashboard.png"
+                        alt="TrustOS dashboard" loading="lazy">
+                    <div class="shot-cap">01 — Dashboard: case volume, risk distribution, and agent throughput at a
+                        glance</div>
+                </div>
+                <div class="shot">
+                    <img src="https://github.com/andy18av-alt/TrustOS/raw/main/assets/Investigation%20queue.png"
+                        alt="Investigation queue" loading="lazy">
+                    <div class="shot-cap">02 — Investigation queue, prioritised by risk</div>
+                </div>
+                <div class="shot">
+                    <img src="https://github.com/andy18av-alt/TrustOS/raw/main/assets/Anaytics%201.png"
+                        alt="Analytics view" loading="lazy">
+                    <div class="shot-cap">03 — Analytics: outcome trends over time</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="stack">
+        <div class="wrap">
+            <div class="section-head">
+                <div class="eyebrow">Under the hood</div>
+                <h2>Built to be assembled, not locked in.</h2>
+            </div>
+            <table class="stack-table">
+                <tr>
+                    <td>Workflow</td>
+                    <td>n8n orchestrates the agent pipeline end to end</td>
+                </tr>
+                <tr>
+                    <td>Reasoning</td>
+                    <td>OpenAI GPT models power each specialised agent</td>
+                </tr>
+                <tr>
+                    <td>Frontend</td>
+                    <td>Built on Lovable for the investigator-facing UI</td>
+                </tr>
+                <tr>
+                    <td>Data store</td>
+                    <td>Google Sheets, for a fast, inspectable source of truth</td>
+                </tr>
+                <tr>
+                    <td>Pattern</td>
+                    <td>Multi-agent architecture with a governance layer on top</td>
+                </tr>
+            </table>
+        </div>
+    </section>
+
+    <section id="value">
+        <div class="wrap">
+            <div class="section-head">
+                <div class="eyebrow">Why it matters</div>
+                <h2>Speed and defensibility, not one instead of the other.</h2>
+            </div>
+            <div class="value-grid">
+                <div class="value-item"><span class="n">→</span>
+                    <h3>Faster turnaround</h3>
+                    <p>Agents do the correlation work up front, so reviewers spend their time on judgment, not
+                        searching.</p>
+                </div>
+                <div class="value-item"><span class="n">→</span>
+                    <h3>Consistent policy</h3>
+                    <p>The same clause gets applied the same way, whether it's case one or case ten thousand.</p>
+                </div>
+                <div class="value-item"><span class="n">→</span>
+                    <h3>Explainable by default</h3>
+                    <p>Every recommendation carries its own reasoning — nothing is a black box when someone asks why.
+                    </p>
+                </div>
+                <div class="value-item"><span class="n">→</span>
+                    <h3>Human authority preserved</h3>
+                    <p>Automation handles volume; people still own every high-impact call.</p>
+                </div>
+                <div class="value-item"><span class="n">→</span>
+                    <h3>Audit-ready by construction</h3>
+                    <p>The log isn't bolted on afterward — it's the same trail the system used to decide.</p>
+                </div>
+                <div class="value-item"><span class="n">→</span>
+                    <h3>Scales without new headcount</h3>
+                    <p>Case volume grows against agent capacity, not against hiring plans.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="wrap">
+            <div class="footer-cta">
+                <div>
+                    <h3>See it running on a real case.</h3>
+                    <p>The live demo walks through intake to sealed decision, end to end.</p>
+                </div>
+                <div class="footer-links">
+                    <a class="btn btn-primary" href="https://risk-arbiter.lovable.app" target="_blank"
+                        rel="noopener">Open live demo</a>
+                    <a class="btn btn-ghost"
+                        href="https://github.com/andy18av-alt/TrustOS/blob/main/docs/TRUSTOS_Whitepaper.pdf"
+                        target="_blank" rel="noopener">Whitepaper</a>
+                    <a class="btn btn-ghost"
+                        href="https://github.com/andy18av-alt/TrustOS/blob/main/docs/TrustOS_pitch_deck.pdf"
+                        target="_blank" rel="noopener">Pitch deck</a>
+                </div>
+            </div>
+            <div class="foot-bottom">
+                <span>TrustOS — created by team. Apache-2.0 licensed.</span>
+                <a href="https://github.com/andy18av-alt/TrustOS" target="_blank"
+                    rel="noopener">github.com/andy18av-alt/TrustOS</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const cases = [
+            {
+                id: "CASE-88213", lines: [
+                    ["evidence_agent", "cross-referenced 3 payment records", "ok"],
+                    ["vision_agent", "image_hash_mismatch detected", "risk"],
+                    ["policy_agent", "matched clause 4.2(b) — listing misrepresentation", "ok"],
+                    ["risk_council", "composite score 0.82 — high", "risk"],
+                    ["decision_engine", "routed to human review", "ok"],
+                    ["governance", "decision logged, hash sealed", "ok"],
+                ]
+            },
+            {
+                id: "CASE-88214", lines: [
+                    ["evidence_agent", "no anomalies across linked accounts", "ok"],
+                    ["policy_agent", "no clause match found", "ok"],
+                    ["risk_council", "composite score 0.11 — low", "ok"],
+                    ["decision_engine", "auto-closed, no review needed", "ok"],
+                    ["governance", "decision logged, hash sealed", "ok"],
+                ]
+            },
+            {
+                id: "CASE-88215", lines: [
+                    ["evidence_agent", "duplicate device fingerprint found", "risk"],
+                    ["vision_agent", "no visual signal submitted", "ok"],
+                    ["policy_agent", "matched clause 2.1 — account abuse", "risk"],
+                    ["risk_council", "composite score 0.91 — critical", "risk"],
+                    ["decision_engine", "escalated to senior reviewer", "risk"],
+                    ["governance", "decision logged, hash sealed", "ok"],
+                ]
+            },
+        ];
+
+        const body = document.getElementById('ledgerBody');
+        let caseIdx = 0, lineIdx = 0, hour = 14, min = 2, sec = 11;
+
+        function tick() {
+            sec += Math.floor(Math.random() * 2) + 1;
+            if (sec >= 60) { sec -= 60; min++; }
+            if (min >= 60) { min -= 60; hour++; }
+            return `${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+        }
+
+        function pruneOld() {
+            while (body.children.length > 9) {
+                body.removeChild(body.firstChild);
+            }
+        }
+
+        function addLine() {
+            const c = cases[caseIdx];
+            const [agent, msg, kind] = c.lines[lineIdx];
+            const div = document.createElement('div');
+            div.className = 'ledger-line';
+            div.innerHTML = `<span class="ts">[${tick()}]</span><span class="case">${c.id}</span><span class="msg ${kind}">${agent} → ${msg}</span>`;
+            body.appendChild(div);
+            pruneOld();
+
+            lineIdx++;
+            if (lineIdx >= c.lines.length) {
+                lineIdx = 0;
+                caseIdx = (caseIdx + 1) % cases.length;
+            }
+        }
+
+        for (let i = 0; i < 5; i++) addLine();
+        setInterval(addLine, 1700);
+    </script>
+
+</body>
+
+</html>
